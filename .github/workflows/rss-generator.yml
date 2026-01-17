@@ -1,5 +1,6 @@
 name: Zen RSS Generator
 
+    echo "Зависимости установлены"
 on:
   schedule:
     - cron: '0 */2 * * *'  # Каждые 2 часа
@@ -43,3 +44,7 @@ jobs:
       run: |
         echo "🚀 RSS-лента успешно обновлена!"
         echo "🔗 Доступна по адресу: https://$GITHUB_ACTOR.github.io/zen-rss-auto/feed.xml"
+ name: Install dependencies
+  run: |
+    pip install -r requirements.txt
+    echo "Зависимости установлены"
