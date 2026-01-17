@@ -11,7 +11,7 @@ from io import BytesIO
 
 # 🔑 ОПЦИОНАЛЬНО: Замените на ваш OpenAI API key для генерации изображений
 # Если нет ключа - система будет использовать бесплатные стоковые фото
-OPENAI_API_KEY = ""  # Оставьте пустым для бесплатного режима
+OPENAI_API_KEY = "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"  # Оставьте пустым для бесплатного режима
 NETLIFY_BASE_URL = "https://meek-gingersnap-1bfc42.netlify.app/"  # Ваш Netlify URL
 
 def generate_zen_article():
