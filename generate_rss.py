@@ -177,7 +177,7 @@ def generate_stock_image(title):
         # 🌐 4. Загружаем на ImgBB (бесплатный хостинг)
         api_url = "https://api.imgbb.com/1/upload"
         params = {
-            "key": "20a4b69a0c8f1ce2c56a8e6c0a1b5e5d",  # Ключ ImgBB (публичный для демо)
+            "key": "f7d2f841b773c7b7e7bb4c52bd018623",  # Ключ ImgBB (публичный для демо)
             "image": base64.b64encode(img_byte_arr.read()).decode('utf-8')
         }
         
