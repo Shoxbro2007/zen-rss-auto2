@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 import textwrap
 import base64
 from io import BytesIO
-
+import uuid
 # 🔑 ОПЦИОНАЛЬНО: Замените на ваш OpenAI API key для генерации изображений
 # Если нет ключа - система будет использовать бесплатные стоковые фото
 OPENAI_API_KEY = "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"  # Оставьте пустым для бесплатного режима
@@ -16,7 +16,7 @@ NETLIFY_BASE_URL = "https://meek-gingersnap-1bfc42.netlify.app/"  # Ваш Netli
 
 def generate_zen_article():
     """Генерирует статью БЕЗ внешних API (полностью автономно)"""
-    
+    unique_id = str(uuid.uuid4())[:8]  # Уникальный ID для каждой статьи
     # 🧠 1. ВСТРОЕННАЯ БАЗА ШАБЛОНОВ (никаких API!)
     TEMPLATES = [
         {
