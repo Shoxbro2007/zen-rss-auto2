@@ -13,20 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up Python
+    - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.10'
     
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install -r requirements.txt
         echo "✅ Зависимости установлены"
     
     - name: Generate RSS feed
       run: |
         python generate_rss.py
-        echo "📊 Содержимое RSS-ленты:"
         cat feed.xml | head -20
     
     - name: Deploy to Netlify
@@ -35,9 +35,4 @@ jobs:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       with:
-        args: deploy --dir=. --prod
-    
-    - name: Success message
-      run: |
-        echo "🚀 RSS-лента успешно обновлена!"
-        echo "🔗 Проверить: https://meek-gingersnap-1bfc42.netlify.app/feed.xml"
+        args: deploy --dir=. --prod --message "Automated RSS update"
