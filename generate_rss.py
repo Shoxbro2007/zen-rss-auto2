@@ -285,7 +285,7 @@ def generate_rss_feed():
             ET.SubElement(item, 'link').text = fallback_article['url']
             ET.SubElement(item, 'description').text = fallback_article['content']
             ET.SubElement(item, 'guid', isPermaLink='false').text = fallback_article['url']
-            ET.SubElement(item, 'pubDate').text = (datetime.now(moscow_tz) - timedelta(hours=i+1)).strftime('%a, %d %b %Y %H:%M:%S %z')
+            ET.SubElement(item, 'pub_date = (datetime.now(moscow_tz) - timedelta(hours=i+1)).strftime('%a, %d %b %Y %H:%M:%S %z').replace("+0300", "+0300")
             
             enclosure = ET.SubElement(item, 'enclosure')
             enclosure.set('url', fallback_article['image_url'])
