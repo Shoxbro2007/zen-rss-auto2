@@ -2,22 +2,21 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 import pytz
 import random
-import requests
+import uuid
 import os
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 import base64
 from io import BytesIO
-import uuid
-# 🔑 ОПЦИОНАЛЬНО: Замените на ваш OpenAI API key для генерации изображений
-# Если нет ключа - система будет использовать бесплатные стоковые фото
-OPENAI_API_KEY = "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"  # Оставьте пустым для бесплатного режима
-NETLIFY_BASE_URL = "https://meek-gingersnap-1bfc42.netlify.app/"  # Ваш Netlify URL
+
+# ВАШИ НАСТРОЙКИ (ЗАМЕНИТЕ НА СВОИ)
+NETLIFY_BASE_URL = "https://meek-gingersnap-1bfc42.netlify.app"  # Ваш Netlify URL
+CHANNEL_LINK = "https://dzen.ru/id/66a68791ef9cc46293177763"  # Замените на ваш ID канала Дзен
 
 def generate_zen_article():
-    """Генерирует статью БЕЗ внешних API (полностью автономно)"""
-    unique_id = str(uuid.uuid4())[:8]  # Уникальный ID для каждой статьи
-    # 🧠 1. ВСТРОЕННАЯ БАЗА ШАБЛОНОВ (никаких API!)
+    """Генерирует статью с уникальным ID и правильным форматом"""
+    
+    # 🧠 1. ВСТРОЕННАЯ БАЗА ШАБЛОНОВ
     TEMPLATES = [
         {
             "title": "🔥 {num} Секрет{ending}, Которые Сэкономят Вам {hours} Часов В Неделю!",
@@ -38,29 +37,20 @@ def generate_zen_article():
                 "✅ 3. {method3} - {result3}"
             ],
             "cta": "🔥 Подписывайтесь - завтра расскажу о скрытых возможностях!"
-        },
-        {
-            "title": "🚨 {num} Ошиб{ending}, Которые Убивают Вашу Продуктивность",
-            "hook": "Ваша утренняя рутина тратит ваше время? Вот как это исправить!",
-            "points": [
-                "✅ 1. {mistake1} → {solution1}",
-                "✅ 2. {mistake2} → {solution2}",
-                "✅ 3. {mistake3} → {solution3}"
-            ],
-            "cta": "📌 Нажмите на колокольчик - завтра будет лайфхак для идеального дня!"
         }
     ]
     
-    # 🎲 2. РАНДОМИЗАЦИЯ ПАРАМЕТРОВ
+    # 🎲 2. РАНДОМИЗАЦИЯ
     template = random.choice(TEMPLATES)
     year = datetime.now().year
     num = random.randint(3, 5)
     hours = random.randint(5, 15)
+    unique_id = str(uuid.uuid4())[:8]  # УНИКАЛЬНЫЙ ID ДЛЯ СТАТЬИ
     
     # Склонение окончаний
     ending = "а" if num in [2, 3, 4] else "ов" if num > 4 else ""
     
-    # 🛠️ 3. ЗАПОЛНЕНИЕ ШАБЛОНА ДАННЫМИ
+    # 🛠️ 3. ЗАПОЛНЕНИЕ ШАБЛОНА
     if "Секрет" in template["title"]:
         article_data = {
             "tool1": random.choice(["Автоматизация в Telegram", "AI-ассистенты", "Zapier"]), 
@@ -70,7 +60,7 @@ def generate_zen_article():
             "tool3": random.choice(["Яндекс Дзен RSS", "VK API", "GitHub Actions"]),
             "benefit3": random.choice(["опубликует посты сам", "соберет аудиторию", "заменит менеджера"])
         }
-    elif "Способ" in template["title"]:
+    else:
         article_data = {
             "method1": random.choice(["Партнерские программы", "Продажа шаблонов", "Контент для бизнеса"]),
             "result1": random.choice(["+50 000 ₽/месяц", "пассивный доход", "клиенты из соцсетей"]),
@@ -79,166 +69,95 @@ def generate_zen_article():
             "method3": random.choice(["AI-генерация контента", "RSS-импорт", "Видео из текста"]),
             "result3": random.choice(["контент на месяц за 1 час", "10 каналов за цену одного", "вирусные ролики"])
         }
-    else:  # Ошибки
-        article_data = {
-            "mistake1": random.choice(["Многозадачность", "Ручная публикация", "Отсутствие шаблонов"]), 
-            "solution1": random.choice(["фокус на 1 задаче", "автоматизация через API", "создание базы знаний"]),
-            "mistake2": random.choice(["Спам лайками", "Покупка подписчиков", "Одинаковый контент"]),
-            "solution2": random.choice(["качество вместо количества", "органический рост", "уникальные форматы"]),
-            "mistake3": random.choice(["Игнорирование аналитики", "Редкие публикации", "Нет призывов"]),
-            "solution3": random.choice(["ежедневный анализ", "график публикаций", "вовлекающие вопросы"])
-        }
     
-    # ✨ 4. СБОРКА ФИНАЛЬНОГО ТЕКСТА
-    title = template["title"].format(num=num, ending=ending, hours=hours, year=year)
+    # ✨ 4. СБОРКА ТЕКСТА С УНИКАЛЬНЫМ ID
+    title = template["title"].format(num=num, ending=ending, hours=hours, year=year) + f" [{unique_id}]"
     hook = template["hook"].format(hours=hours, year=year)
     points = "\n".join([p.format(**article_data) for p in template["points"]])
     cta = template["cta"]
     
     article_text = f"{hook}\n\n{points}\n\n{cta}"
     
-    # 🖼️ 5. ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЯ (без OpenAI)
+    # 🖼️ 5. ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЯ
     try:
-        if OPENAI_API_KEY:
-            # Генерация через DALL-E если есть ключ
-            image_url = generate_dalle_image(title)
-        else:
-            # Бесплатные стоковые фото с персонализацией
-            image_url = generate_stock_image(title)
-            
-    except Exception as e:
-        print(f"⚠️ Ошибка генерации изображения: {e}")
-        # 💯 100% рабочий запасной вариант
-        image_url = random.choice([
-            "https://picsum.photos/1200/675?random=tech1",
-            "https://picsum.photos/1200/675?random=tech2",
-            "https://picsum.photos/1200/675?random=ai3",
-            "https://picsum.photos/1200/675?random=automation4"
+        # Бесплатные стоковые фото
+        stock_url = random.choice([
+            "https://picsum.photos/1200/675?grayscale",
+            "https://picsum.photos/1200/675?blur=2",
+            "https://picsum.photos/1200/675?nature",
+            "https://picsum.photos/1200/675?technology"
         ])
-    
-    # 🔥 6. ФИНАЛЬНЫЙ ФОРМАТ ДЛЯ ДЗЕНА
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return {
-        "title": title[:60] + "...",  # Обрезаем до 60 символов
-        "content": f'<img src="{image_url}" alt="Иллюстрация" style="max-width:100%;margin:20px 0"/><br/>' + article_text,
-        "url": f"{NETLIFY_BASE_URL}/post_{timestamp}",
-        "image_url": image_url
-    }
-
-def generate_stock_image(title):
-    """Генерирует изображение с текстом поверх бесплатного стока"""
-    
-    # 🖼️ 1. Скачиваем бесплатное фото
-    stock_url = random.choice([
-        "https://picsum.photos/1200/675?grayscale",
-        "https://picsum.photos/1200/675?blur=2",
-        "https://picsum.photos/1200/675?nature",
-        "https://picsum.photos/1200/675?technology"
-    ])
-    
-    try:
+        
+        # Добавляем текст заголовка поверх изображения
         response = requests.get(stock_url, timeout=10)
         img = Image.open(BytesIO(response.content))
         
-        # ✍️ 2. Добавляем текст заголовка
         draw = ImageDraw.Draw(img)
-        
-        # Выбираем шрифт (встроенный)
         try:
             font = ImageFont.truetype("arialbd.ttf", 48)
         except:
             font = ImageFont.load_default()
         
         # Разбиваем заголовок на строки
-        wrapped_title = textwrap.fill(title[:30], width=25)  # Макс 30 символов
+        wrapped_title = textwrap.fill(title[:30], width=25)
         
-        # Позиция текста (верхний центр)
+        # Позиция текста
         text_bbox = draw.textbbox((0, 0), wrapped_title, font=font)
         text_width = text_bbox[2] - text_bbox[0]
-        text_height = text_bbox[3] - text_bbox[1]
-        
         x = (img.width - text_width) / 2
-        y = img.height * 0.1  # 10% от верха
+        y = img.height * 0.1
         
-        # Градиентный фон для текста
+        # Добавляем полупрозрачный фон под текст
         draw.rectangle([
             (x - 20, y - 10),
-            (x + text_width + 20, y + text_height + 10)
+            (x + text_width + 20, y + text_bbox[3] - text_bbox[1] + 10)
         ], fill=(0, 0, 0, 180))
         
         # Белый текст с обводкой
         draw.text((x, y), wrapped_title, font=font, fill=(255, 255, 255), stroke_width=2, stroke_fill=(0, 0, 0))
         
-        # 💾 3. Сохраняем в памяти
+        # Сохраняем в памяти
         img_byte_arr = BytesIO()
         img.save(img_byte_arr, format='JPEG', quality=85)
         img_byte_arr.seek(0)
         
-        # 🌐 4. Загружаем на ImgBB (бесплатный хостинг)
+        # Загружаем на ImgBB
         api_url = "https://api.imgbb.com/1/upload"
         params = {
-            "key": "f7d2f841b773c7b7e7bb4c52bd018623",  # Ключ ImgBB (публичный для демо)
+            "key": "20a4b69a0c8f1ce2c56a8e6c0a1b5e5d",
             "image": base64.b64encode(img_byte_arr.read()).decode('utf-8')
         }
         
         response = requests.post(api_url, data=params, timeout=15)
         if response.status_code == 200:
-            return response.json()['data']['url']
+            image_url = response.json()['data']['url']
         else:
-            raise Exception("ImgBB upload failed")
+            image_url = stock_url
             
     except Exception as e:
-        print(f"⚠️ Ошибка создания изображения: {e}")
-        return stock_url  # Возвращаем оригинальный сток
-
-def generate_dalle_image(prompt):
-    """Генерация через DALL-E (только если есть ключ)"""
-    if not OPENAI_API_KEY:
-        return generate_stock_image(prompt)
+        print(f"⚠️ Ошибка генерации изображения: {e}")
+        image_url = random.choice([
+            "https://picsum.photos/1200/675?random=tech1",
+            "https://picsum.photos/1200/675?random=tech2"
+        ])
     
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {OPENAI_API_KEY}"
-    }
-    
-    payload = {
-        "model": "dall-e-3",
-        "prompt": f"Industrial style, {prompt[:200]}, digital art, neon colors, futuristic interface, glowing elements --ar 16:9",
-        "n": 1,
-        "size": "1792x1024",
-        "response_format": "b64_json"
-    }
-    
-    response = requests.post(
-        "https://api.openai.com/v1/images/generations",
-        headers=headers,
-        json=payload,
-        timeout=60
-    )
-    
-    if response.status_code != 200:
-        raise Exception(f"OpenAI error: {response.text}")
-    
-    image_data = response.json()['data'][0]['b64_json']
-    image_bytes = base64.b64decode(image_data)
-    
-    # Сохраняем локально для Netlify
+    # 🔥 6. ФИНАЛЬНЫЙ ФОРМАТ
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    os.makedirs('images', exist_ok=True)
-    image_path = f"images/dalle_{timestamp}.png"
-    
-    with open(image_path, 'wb') as f:
-        f.write(image_bytes)
-    
-    return f"{NETLIFY_BASE_URL}/{image_path}"
+    return {
+        "title": title[:60] + "...",
+        "content": f'<img src="{image_url}" alt="Иллюстрация" style="max-width:100%;margin:20px 0"/><br/>' + article_text,
+        "url": f"{NETLIFY_BASE_URL}/post_{timestamp}_{unique_id}",
+        "image_url": image_url,
+        "pub_date": (datetime.now(pytz.timezone('Europe/Moscow')) - timedelta(hours=1)).strftime('%a, %d %b %Y %H:%M:%S +0300')
+    }
 
 def generate_rss_feed():
-    """Генерирует RSS-ленту с изображениями"""
+    """Генерирует RSS-ленту без ошибок XML"""
     
     CHANNEL_TITLE = "Авто-Дзен Тест"
-    CHANNEL_LINK = "https://dzen.ru/id/66a68791ef9cc46293177763"  # 🔴 ОБЯЗАТЕЛЬНО ЗАМЕНИТЕ!
     CHANNEL_DESCRIPTION = "Технологии будущего: автоматически генерируемый контент"
     
+    # Создаем XML-структуру
     rss = ET.Element('rss', version='2.0')
     channel = ET.SubElement(rss, 'channel')
     
@@ -246,68 +165,41 @@ def generate_rss_feed():
     ET.SubElement(channel, 'link').text = CHANNEL_LINK
     ET.SubElement(channel, 'description').text = CHANNEL_DESCRIPTION
     ET.SubElement(channel, 'language').text = 'ru'
-    ET.SubElement(channel, 'generator').text = 'Zen RSS Auto Generator v3.0'
+    ET.SubElement(channel, 'generator').text = 'Zen RSS Auto Generator v4.0'
     
-    # 📅 Генерируем 3 статьи
-    moscow_tz = pytz.timezone('Europe/Moscow')
+    # Генерируем 3 статьи
     articles = []
     
     for i in range(3):
-        try:
-            article = generate_zen_article()
-            articles.append(article)
-            
-            item = ET.SubElement(channel, 'item')
-            ET.SubElement(item, 'title').text = article['title']
-            ET.SubElement(item, 'link').text = article['url']
-            ET.SubElement(item, 'description').text = article['content']
-            ET.SubElement(item, 'guid', isPermaLink='false').text = article['url']
-            ET.SubElement(item, 'pubDate').text = (datetime.now(moscow_tz) - timedelta(hours=i+1)).strftime('%a, %d %b %Y %H:%M:%S %z')
-            
-            # 🔗 Добавляем изображение как enclosure
-            enclosure = ET.SubElement(item, 'enclosure')
-            enclosure.set('url', article['image_url'])
-            enclosure.set('type', 'image/jpeg')
-            enclosure.set('length', '123456')  # Обязательный параметр
-            
-        except Exception as e:
-            print(f"⚠️ Ошибка генерации статьи {i+1}: {e}")
-            # Запасная статья
-            fallback_article = {
-                "title": f"🔥 Технологии {datetime.now().year}: {i+1} Главных Трендов",
-                "content": '<img src="https://picsum.photos/1200/675?random=backup" style="max-width:100%;margin:20px 0"/><br/>Автоматизируйте свою жизнь с помощью современных инструментов! Узнайте как в следующих статьях.',
-                "url": f"{NETLIFY_BASE_URL}/fallback_{i}",
-                "image_url": "https://picsum.photos/1200/675?random=backup"
-            }
-            
-            item = ET.SubElement(channel, 'item')
-            ET.SubElement(item, 'title').text = fallback_article['title']
-            ET.SubElement(item, 'link').text = fallback_article['url']
-            ET.SubElement(item, 'description').text = fallback_article['content']
-            ET.SubElement(item, 'guid', isPermaLink='false').text = fallback_article['url']
-            ET.SubElement(item, 'pub_date = (datetime.now(moscow_tz) - timedelta(hours=i+1)).strftime('%a, %d %b %Y %H:%M:%S %z').replace("+0300", "+0300")
-            
-            enclosure = ET.SubElement(item, 'enclosure')
-            enclosure.set('url', fallback_article['image_url'])
-            enclosure.set('type', 'image/jpeg')
-            enclosure.set('length', '123456')
+        article = generate_zen_article()
+        articles.append(article)
+        
+        item = ET.SubElement(channel, 'item')
+        ET.SubElement(item, 'title').text = article['title']
+        ET.SubElement(item, 'link').text = article['url']
+        ET.SubElement(item, 'description').text = article['content']
+        ET.SubElement(item, 'guid', isPermaLink='false').text = article['url']
+        ET.SubElement(item, 'pubDate').text = article['pub_date']  # ПРАВИЛЬНЫЙ ФОРМАТ ДАТЫ
+        
+        # Добавляем изображение как enclosure
+        enclosure = ET.SubElement(item, 'enclosure')
+        enclosure.set('url', article['image_url'])
+        enclosure.set('type', 'image/jpeg')
+        enclosure.set('length', '123456')
     
-    # 💾 Сохраняем RSS
-    tree = ET.ElementTree(rss)
-    tree.write('feed.xml', encoding='utf-8', xml_declaration=True)
+    # ГЕНЕРИРУЕМ XML БЕЗ ОШИБОК
+    xml_content = ET.tostring(rss, encoding='utf-8', method='xml').decode('utf-8')
     
-    # ✅ Добавляем DOCTYPE для Яндекс Дзен
-    with open('feed.xml', 'r', encoding='utf-8') as f:
-        xml_content = f.read()
-    
+    # ФОРМИРУЕМ ФИНАЛЬНЫЙ КОНТЕНТ С ТОЧНЫМ ФОРМАТОМ
     final_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + \
                    '<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://my.netscape.com/publish/formats/rss-0.91.dtd">\n' + \
                    xml_content
     
+    # ЗАПИСЫВАЕМ БЕЗ ЛИШНИХ ПРОБЕЛОВ
     with open('feed.xml', 'w', encoding='utf-8') as f:
-        f.write(final_content)
+        f.write(final_content.strip())  # Удаляем лишние пробелы
     
-    print(f"✅ RSS-лента создана: {len(articles)} статей с изображениями")
+    print(f"✅ RSS-лента создана: {len(articles)} статей с правильным форматом")
     return 'feed.xml'
 
 if __name__ == "__main__":
