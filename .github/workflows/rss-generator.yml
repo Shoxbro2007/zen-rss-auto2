@@ -1,9 +1,9 @@
-name: Zen RSS Generator
+name: RSS Generator for Vercel
 
 on:
   schedule:
     - cron: '0 */2 * * *'  # Каждые 2 часа
-  workflow_dispatch:  # Запуск вручную
+  workflow_dispatch:
 
 jobs:
   generate-and-deploy:
@@ -13,24 +13,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up Python 3.10
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install pytz
         echo "✅ Зависимости установлены"
     
     - name: Generate RSS feed
       run: |
         python generate_rss.py
-        cat feed.xml | head -20
+        cat feed.xml
     
-    - name: Deploy to Netlify
-      uses: netlify/actions/cli@master
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
