@@ -31,6 +31,14 @@ jobs:
         echo "📊 RSS feed generated:"
         cat feed.xml | head -10
     
+    - name: Commit and push feed.xml
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git add feed.xml
+        git commit -m "Update RSS feed $(date)" || exit 0
+        git push origin main
+    
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
