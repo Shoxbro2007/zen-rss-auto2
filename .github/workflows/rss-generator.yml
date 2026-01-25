@@ -31,7 +31,7 @@ jobs:
         echo "📊 RSS feed generated:"
         cat feed.xml | head -10
     
-    - name: Commit and push feed.xml
+    - name: Commit and push feed.xml to main
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
@@ -39,16 +39,7 @@ jobs:
         git commit -m "Update RSS feed $(date)" || exit 0
         git push origin main
     
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: ./
-        keep_files: false
-        force_orphan: true
-    
     - name: Success notification
       run: |
-        echo "🚀 RSS deployed successfully!"
-        echo "🔗 URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/feed.xml"
+        echo "🚀 RSS feed updated on main branch!"
+        echo "🔗 URL: https://Shoxbro2007.github.io/zen-rss-auto2/feed.xml"
