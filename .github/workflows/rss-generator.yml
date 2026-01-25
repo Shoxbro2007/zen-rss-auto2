@@ -25,21 +25,22 @@ jobs:
         pip install pytz
         echo "✅ Dependencies installed"
     
-    - name: Generate RSS feed
+    - name: Generate RSS as index.html
       run: |
         python generate_rss.py
-        echo "📊 RSS feed generated:"
-        cat feed.xml | head -10
+        # Копируем feed.xml в index.html для GitHub Pages
+        cp feed.xml index.html
+        echo "📊 RSS feed generated as index.html"
     
-    - name: Commit and push feed.xml to main
+    - name: Commit and push files
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        git add feed.xml
+        git add index.html feed.xml
         git commit -m "Update RSS feed $(date)" || exit 0
         git push origin main
     
     - name: Success notification
       run: |
-        echo "🚀 RSS feed updated on main branch!"
-        echo "🔗 URL: https://Shoxbro2007.github.io/zen-rss-auto2/feed.xml"
+        echo "🚀 RSS deployed as index.html!"
+        echo "🔗 URL: https://Shoxbro2007.github.io/zen-rss-auto2/"
