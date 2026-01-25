@@ -1,4 +1,4 @@
-name: RSS Generator for GitHub Pages
+name: Zen Empire + Telegram Generator
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Ручной запуск
 
 jobs:
-  generate-and-deploy:
+  zen-empire:
     runs-on: ubuntu-latest
     
     steps:
@@ -22,25 +22,32 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install pytz
+        pip install pytz telebot requests
         echo "✅ Dependencies installed"
     
-    - name: Generate RSS as index.html
+    - name: Generate all channel RSS feeds
       run: |
         python generate_rss.py
-        # Копируем feed.xml в index.html для GitHub Pages
-        cp feed.xml index.html
-        echo "📊 RSS feed generated as index.html"
+        echo "📊 Generated 10 channel feeds:"
+        ls -la feed_*.xml
     
-    - name: Commit and push files
+    - name: Publish to Telegram
+      env:
+        BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      run: |
+        # Заменяем токен в скрипте
+        sed -i "s/ВАШ_BOT_TOKEN_ОТ_BOTFATHER/$BOT_TOKEN/g" telegram_publisher.py
+        python telegram_publisher.py
+    
+    - name: Commit and push all feeds
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        git add index.html feed.xml
-        git commit -m "Update RSS feed $(date)" || exit 0
+        git add feed_*.xml
+        git commit -m "Update 10 channel feeds + Telegram posts $(date)" || exit 0
         git push origin main
     
     - name: Success notification
       run: |
-        echo "🚀 RSS deployed as index.html!"
-        echo "🔗 URL: https://Shoxbro2007.github.io/zen-rss-auto2/"
+        echo "🚀 Zen Empire + Telegram Empire deployed!"
+        echo "📊 10 Zen channels + 3 Telegram channels active"
