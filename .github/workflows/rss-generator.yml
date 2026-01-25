@@ -1,53 +1,29 @@
-name: Zen Empire + Telegram Generator
+name: Zen + Telegram Empire
 
 on:
   schedule:
     - cron: '0 */2 * * *'  # Каждые 2 часа
-  workflow_dispatch:  # Ручной запуск
+  workflow_dispatch:
 
 jobs:
   zen-empire:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        ref: main
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    
-    - name: Install dependencies
-      run: |
-        pip install pytz telebot requests
-        echo "✅ Dependencies installed"
-    
-    - name: Generate all channel RSS feeds
-      run: |
-        python generate_rss.py
-        echo "📊 Generated 10 channel feeds:"
-        ls -la feed_*.xml
-    
-    - name: Publish to Telegram
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with: {python-version: '3.10'}
+    - run: pip install -r requirements.txt
+    - run: python generate_rss.py
+    - run: git add feed_*.xml && git config --global user.name "GitHub Action" && git config --global user.email "action@github.com" && git commit -m "Update RSS" && git push origin main
+
+  telegram-empire:
+    runs-on: ubuntu-latest
+    needs: zen-empire
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with: {python-version: '3.10'}
+    - run: pip install -r requirements.txt
+    - run: python telegram_bot.py
       env:
-        BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      run: |
-        # Заменяем токен в скрипте
-        sed -i "s/ВАШ_BOT_TOKEN_ОТ_BOTFATHER/$BOT_TOKEN/g" telegram_publisher.py
-        python telegram_publisher.py
-    
-    - name: Commit and push all feeds
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git add feed_*.xml
-        git commit -m "Update 10 channel feeds + Telegram posts $(date)" || exit 0
-        git push origin main
-    
-    - name: Success notification
-      run: |
-        echo "🚀 Zen Empire + Telegram Empire deployed!"
-        echo "📊 10 Zen channels + 3 Telegram channels active"
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
