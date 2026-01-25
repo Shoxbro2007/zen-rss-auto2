@@ -1,9 +1,9 @@
-name: RSS Generator for Vercel
+name: RSS Generator for GitHub Pages
 
 on:
   schedule:
     - cron: '0 */2 * * *'  # Каждые 2 часа
-  workflow_dispatch:
+  workflow_dispatch:  # Ручной запуск
 
 jobs:
   generate-and-deploy:
@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: main
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -21,22 +23,24 @@ jobs:
     - name: Install dependencies
       run: |
         pip install pytz
-        echo "✅ Зависимости установлены"
+        echo "✅ Dependencies installed"
     
     - name: Generate RSS feed
       run: |
         python generate_rss.py
-        cat feed.xml
+        echo "📊 RSS feed generated:"
+        cat feed.xml | head -10
     
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v25
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod'
-      env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      with:
-        args: deploy --dir=. --prod --message "Automated RSS update"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages  # ВАЖНО!
+        publish_dir: ./
+        keep_files: false
+        force_orphan: true
+    
+    - name: Success notification
+      run: |
+        echo "🚀 RSS deployed successfully!"
+        echo "🔗 URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/feed.xml"
